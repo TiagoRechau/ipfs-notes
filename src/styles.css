@@ -1,0 +1,21 @@
+* {
+  margin: 0;
+  padding: 0;
+}
+
+.App {
+  font-family: sans-serif;
+  padding: 10px;
+  display: grid;
+  gap: 10px;
+}
+
+.editor {
+  border: 1px solid black;
+  padding: 20px;
+}
+
+.preview {
+  background-color: beige;
+  padding: 20px;
+}
