@@ -1,92 +1,37 @@
-import * as React from "react";
-import "./styles.css";
-import ReactMarkdown from "react-markdown";
-import RemarkGFM from "remark-gfm";
-import IpfsHttpClient from "ipfs-http-client";
-//import { useWallet, UseWalletProvider } from "use-wallet";
-const ipfs = IpfsHttpClient({
-  host: "ipfs.infura.io",
-  port: 5001,
-  protocol: "https"
-});
-
-const onLoad = async (cid: string) => {
-  const content = [];
-  for await (const file of ipfs.get(cid)) {
-    for await (const chunk of file.content) {
-      content.push(chunk);
-    }
-  }
-  return content.toString();
-};
-
-const onSave = async (content: string) => {
-  const result = await ipfs.add(content);
-  return result.path;
-};
+import React from "react";
+import { HashRouter as Router, Switch, Route, Link } from "react-router-dom";
+import Note from "./pages/Note/Note";
+import Home from "./pages/Home/Home";
 
 export default function App() {
-  const [content, setContent] = React.useState("");
-  const [cid, setCid] = React.useState("");
-  const [path, setPath] = React.useState("");
-  const contentRef = React.useRef<null | HTMLDivElement>(null);
-  //const wallet = useWallet();
   return (
-    <div className="App">
-      {/*<button onClick={() => wallet.connect("injected")}>Connect</button> */}
-      <input
-        type="text"
-        onChange={(event) => setCid((event.target as HTMLInputElement).value)}
-      />
-      <button
-        onClick={async () => {
-          const content = await onLoad(cid);
-          setContent(content);
-          contentRef.current!.innerText = content;
-        }}
-      >
-        Load note
-      </button>
-      <section className="editor-preview__container">
-        <div
-          className="editor"
-          contentEditable
-          onKeyUp={(event) =>
-            setContent((event.target as HTMLElement).innerText)
-          }
-          ref={contentRef}
-        ></div>
+    <Router>
+      <div>
+        <nav>
+          <ul>
+            <li>
+              <Link to="/">Home</Link>
+            </li>
+            <li>
+              <Link to="/note">New Note</Link>
+            </li>
+          </ul>
+        </nav>
 
-        <ReactMarkdown
-          plugins={[RemarkGFM]}
-          source={content}
-          className="preview"
-        />
-      </section>
-      <button
-        onClick={async () => {
-          const cid = await onSave(content);
-          setPath(cid);
-        }}
-      >
-        Save{" "}
-      </button>
-      {path ? <p>CID: {path} </p> : null}
-    </div>
+        {/* A <Switch> looks through its children <Route>s and
+            renders the first one that matches the current URL. */}
+        <Switch>
+          <Route path="/note/:id">
+            <Note />
+          </Route>
+          <Route path="/note/">
+            <Note />
+          </Route>
+          <Route path="/">
+            <Home />
+          </Route>
+        </Switch>
+      </div>
+    </Router>
   );
 }
-
-// Wrap everything in <UseWalletProvider />
-/* 
-export default () => (
-  <UseWalletProvider
-    chainId={1}
-    connectors={{
-      // This is how connectors get configured
-      injected: {}
-    }}
-  >
-    <App />
-  </UseWalletProvider>
-);
-*/
